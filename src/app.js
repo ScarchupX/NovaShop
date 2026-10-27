@@ -13,11 +13,15 @@
   var carritoEstado = document.getElementById('carrito-estado');
   var carritoLista = document.getElementById('carrito-lista');
   var carritoTotal = document.getElementById('carrito-total');
+  var iniciarPedido = document.getElementById('iniciar-pedido-whatsapp');
+  var copiarPedido = document.getElementById('copiar-pedido-whatsapp');
   var volverCatalogoDesdeCarrito = document.getElementById(
     'volver-catalogo-desde-carrito'
   );
   var catalogo = window.NovaShopCatalogo;
   var carrito = {};
+  var mensajePedidoPreparado = '';
+  var numeroWhatsApp = '51931463289';
 
   var precioEnSoles = new Intl.NumberFormat('es-PE', {
     minimumFractionDigits: 2,
@@ -241,7 +245,16 @@
       producto = null;
     }
 
-    if (!producto || !Number.isInteger(linea.precioUnitarioCentesimos)) {
+    if (
+      !producto ||
+      !linea ||
+      typeof linea.nombre !== 'string' ||
+      linea.nombre.trim() === '' ||
+      !Number.isInteger(linea.cantidad) ||
+      linea.cantidad <= 0 ||
+      !Number.isInteger(linea.precioUnitarioCentesimos) ||
+      linea.precioUnitarioCentesimos < 0
+    ) {
       return null;
     }
 
@@ -255,6 +268,178 @@
         ? total + linea.precioUnitarioCentesimos * linea.cantidad
         : total;
     }, 0);
+  }
+
+  function construirMensajePedido(lineas, total) {
+    var detalle = lineas.map(function (linea) {
+      var subtotal = linea.precioUnitarioCentesimos * linea.cantidad;
+      return (
+        '- ' +
+        linea.nombre +
+        ' x' +
+        linea.cantidad +
+        ' | Precio unitario: ' +
+        formatoCentesimos(linea.precioUnitarioCentesimos) +
+        ' | Subtotal: ' +
+        formatoCentesimos(subtotal)
+      );
+    });
+
+    return (
+      'Hola, quiero realizar el siguiente pedido:\n\n' +
+      detalle.join('\n') +
+      '\n\nTotal: ' +
+      formatoCentesimos(total) +
+      '\n\nQuedo atento(a) a su atención.'
+    );
+  }
+
+  function construirPedidoPreparado() {
+    var ids = Object.keys(carrito);
+    var lineas;
+
+    if (ids.length === 0) {
+      return { estado: 'carrito-vacio', lineas: [], total: 0, mensaje: '' };
+    }
+
+    lineas = ids.map(function (id) {
+      var linea = carrito[id];
+      var producto = obtenerLineaValida(linea);
+      return producto ? linea : null;
+    });
+
+    if (lineas.some(function (linea) { return !linea; })) {
+      return { estado: 'incompleto', lineas: [], total: 0, mensaje: '' };
+    }
+
+    var total = lineas.reduce(function (suma, linea) {
+      return suma + linea.precioUnitarioCentesimos * linea.cantidad;
+    }, 0);
+
+    return {
+      estado: 'listo',
+      lineas: lineas,
+      total: total,
+      mensaje: construirMensajePedido(lineas, total),
+    };
+  }
+
+  function mostrarAccionCopiar(visible) {
+    copiarPedido.hidden = !visible;
+  }
+
+  function mostrarResultadoPedido(tipo, mensaje) {
+    mostrarEstadoCarrito(tipo, mensaje);
+  }
+
+  function copiarTextoAlternativo(texto) {
+    var textarea = document.createElement('textarea');
+    var copiado = false;
+
+    textarea.value = texto;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      copiado = document.execCommand('copy');
+    } catch (error) {
+      copiado = false;
+    }
+
+    document.body.removeChild(textarea);
+    return copiado;
+  }
+
+  function informarCopiaExitosa() {
+    mostrarResultadoPedido(
+      'success',
+      'Mensaje copiado. Aún debes enviarlo desde WhatsApp; NovaShop no ha confirmado el pedido.'
+    );
+  }
+
+  function copiarMensajePedido() {
+    if (!mensajePedidoPreparado) {
+      return;
+    }
+
+    if (
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === 'function'
+    ) {
+      navigator.clipboard.writeText(mensajePedidoPreparado).then(
+        informarCopiaExitosa,
+        function () {
+          if (copiarTextoAlternativo(mensajePedidoPreparado)) {
+            informarCopiaExitosa();
+          } else {
+            mostrarResultadoPedido(
+              'error',
+              'No se pudo copiar el mensaje preparado. Intenta nuevamente.'
+            );
+          }
+        }
+      );
+      return;
+    }
+
+    if (copiarTextoAlternativo(mensajePedidoPreparado)) {
+      informarCopiaExitosa();
+    } else {
+      mostrarResultadoPedido(
+        'error',
+        'No se pudo copiar el mensaje preparado. Intenta nuevamente.'
+      );
+    }
+  }
+
+  function iniciarPedidoPorWhatsApp() {
+    var pedido = construirPedidoPreparado();
+    var ventana;
+
+    if (pedido.estado === 'carrito-vacio') {
+      mensajePedidoPreparado = '';
+      mostrarAccionCopiar(false);
+      mostrarResultadoPedido(
+        'empty',
+        'Agrega productos disponibles antes de iniciar un pedido por WhatsApp.'
+      );
+      return;
+    }
+
+    if (pedido.estado === 'incompleto') {
+      mensajePedidoPreparado = '';
+      mostrarAccionCopiar(false);
+      mostrarResultadoPedido(
+        'error',
+        'No se pudo preparar el pedido porque una línea del carrito no tiene información válida.'
+      );
+      return;
+    }
+
+    mensajePedidoPreparado = pedido.mensaje;
+    mostrarAccionCopiar(false);
+    ventana = window.open(
+      'https://wa.me/' + numeroWhatsApp + '?text=' +
+        encodeURIComponent(mensajePedidoPreparado),
+      '_blank'
+    );
+
+    if (ventana) {
+      ventana.opener = null;
+      mostrarResultadoPedido(
+        'success',
+        'Se preparó tu pedido en WhatsApp. Revisa el mensaje antes de enviarlo; NovaShop aún no lo ha confirmado.'
+      );
+    } else {
+      mostrarAccionCopiar(true);
+      mostrarResultadoPedido(
+        'error',
+        'No se pudo abrir WhatsApp. Puedes copiar el mensaje preparado; el pedido no fue enviado.'
+      );
+    }
   }
 
   function renderLinea(linea) {
@@ -327,6 +512,8 @@
     }
 
     carritoTotal.textContent = formatoCentesimos(calcularTotal());
+    iniciarPedido.disabled = ids.length === 0;
+    mostrarAccionCopiar(false);
   }
 
   function agregarAlCarrito(id) {
@@ -416,6 +603,8 @@
   });
 
   abrirCarrito.addEventListener('click', renderCarrito);
+  iniciarPedido.addEventListener('click', iniciarPedidoPorWhatsApp);
+  copiarPedido.addEventListener('click', copiarMensajePedido);
   volverCatalogo.addEventListener('click', renderCatalogo);
   volverCatalogoDesdeCarrito.addEventListener('click', renderCatalogo);
 

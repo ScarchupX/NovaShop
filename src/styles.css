@@ -168,6 +168,15 @@ h1 {
   background: var(--warning-soft);
 }
 
+.status-success {
+  min-height: auto;
+  padding: 16px 18px;
+  border: 1px solid #b8dec8;
+  border-radius: 14px;
+  color: var(--success);
+  background: var(--success-soft);
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -528,6 +537,50 @@ h1 {
 .cart-total strong {
   color: var(--brand-dark);
   font-size: 1.4rem;
+}
+
+.cart-order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.whatsapp-button,
+.copy-button {
+  padding: 12px 16px;
+  border: 1px solid var(--brand);
+  border-radius: 12px;
+  color: white;
+  font-weight: 750;
+  background: var(--brand);
+}
+
+.whatsapp-button:hover,
+.whatsapp-button:focus-visible,
+.copy-button:hover,
+.copy-button:focus-visible {
+  border-color: var(--brand-dark);
+  background: var(--brand-dark);
+  outline: none;
+}
+
+.whatsapp-button:disabled {
+  cursor: not-allowed;
+  border-color: var(--line);
+  color: var(--muted);
+  background: #f3f1ed;
+}
+
+.copy-button {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+  border-color: #1b5739;
+  background: #1b5739;
 }
 
 .site-footer {
