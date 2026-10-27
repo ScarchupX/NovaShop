@@ -17,3 +17,9 @@
 
 La ejecución se realizó con `quickstart.md` como guía. Las variantes temporales
 de catálogo vacío y error se restauraron después de la comprobación.
+
+## Regresión en feature 002
+
+Se confirmó desde la interfaz que el catálogo mantiene sus tres productos,
+permite abrir el detalle y conserva los precios en `S/` y las etiquetas de
+disponibilidad después de incorporar el carrito.
