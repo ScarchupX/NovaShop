@@ -18,6 +18,9 @@
           <span>NovaShop</span>
         </a>
         <span class="market-label">Tienda virtual peruana</span>
+        <button id="abrir-carrito" class="cart-summary-button" type="button" aria-controls="carrito-view">
+          Carrito <span id="carrito-contador" class="cart-count">0</span>
+        </button>
       </div>
     </header>
 
@@ -45,6 +48,22 @@
           <span aria-hidden="true">←</span> Volver al catálogo
         </button>
         <div id="detalle-contenido"></div>
+      </section>
+
+      <section id="carrito-view" class="cart-view" aria-labelledby="carrito-titulo" hidden>
+        <button id="volver-catalogo-desde-carrito" class="back-button" type="button">
+          <span aria-hidden="true">←</span> Volver al catálogo
+        </button>
+        <div class="cart-heading">
+          <p class="eyebrow">Tu selección</p>
+          <h1 id="carrito-titulo">Carrito de compras</h1>
+        </div>
+        <div id="carrito-estado" class="status-message" role="status" aria-live="polite"></div>
+        <div id="carrito-lista" class="cart-list" aria-label="Productos del carrito"></div>
+        <div class="cart-total" aria-live="polite">
+          <span>Total</span>
+          <strong id="carrito-total">S/ 0.00</strong>
+        </div>
       </section>
     </main>
 
