@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es-PE">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Consulta el catálogo de productos de NovaShop."
+    />
+    <title>NovaShop | Catálogo</title>
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="brand" href="index.html" aria-label="NovaShop, inicio">
+          <span class="brand-mark" aria-hidden="true">N</span>
+          <span>NovaShop</span>
+        </a>
+        <span class="market-label">Tienda virtual peruana</span>
+      </div>
+    </header>
+
+    <main class="container main-content">
+      <section id="catalogo-view" aria-labelledby="catalogo-titulo">
+        <div class="hero-copy">
+          <p class="eyebrow">Descubre lo que buscas</p>
+          <h1 id="catalogo-titulo">Catálogo de productos</h1>
+          <p class="intro">
+            Conoce nuestros productos, revisa sus detalles y elige tu próximo
+            favorito.
+          </p>
+        </div>
+
+        <div id="catalogo-estado" class="status-message" role="status" aria-live="polite"></div>
+        <div
+          id="catalogo-lista"
+          class="product-grid"
+          aria-label="Productos del catálogo"
+        ></div>
+      </section>
+
+      <section id="detalle-view" class="detail-view" aria-labelledby="detalle-titulo" hidden>
+        <button id="volver-catalogo" class="back-button" type="button">
+          <span aria-hidden="true">←</span> Volver al catálogo
+        </button>
+        <div id="detalle-contenido"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>NovaShop · Precios expresados en soles peruanos (S/).</p>
+      </div>
+    </footer>
+
+    <script src="src/data/catalogo.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>
